@@ -13,4 +13,4 @@ def func(x):
 def test_answer():
     now = datetime.now()
     dt_string = now.strftime("%S")
-    assert (int)dt_string % 5 == 0
+    assert (int)(dt_string) % 5 == 0

@@ -40,6 +40,6 @@ jobs:
       timeout-minutes: 5
       shell: bash
       run: |
-        pytest test_1.py --reruns 20
+        pytest test
 
 

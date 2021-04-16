@@ -4,10 +4,13 @@ __author__ = 'limin'
 
 import os
 import pytest
+from datetime import datetime
 
 def func(x):
     return x +1
 
-@pytest.mark.flaky(reruns=5)
+@pytest.mark.flaky(reruns=20)
 def test_answer():
-    assert func(3)==4
+    now = datetime.now()
+    dt_string = now.strftime("%S")
+    assert (int)dt_string % 5 == 0

@@ -1,36 +1,56 @@
-# This is a basic workflow to help you get started with Actions
+name: TEST-CI-RERUN
 
-name: CI
-
-# Controls when the action will run. 
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches:
+      - 'main'
+    tags:
+      - '*'
   pull_request:
-    branches: [ main ]
+    branches:
+      - 'main'
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+  test-and-build:
+    needs: setup
+    strategy:
+      matrix:
+        envinfo:
+          - { name: 'windows-3.6-x64', os: windows-latest, python-version: 3.6.x, python-arch: x64, TZ: 'CST-8', bdist-platform: 'win_amd64'}
 
-    # Steps represent a sequence of tasks that will be executed as part of the job
+    env:
+        PYTHONUNBUFFERED: 1
+        PYTHONIOENCODING: "utf-8"
+        PYTHONHASHSEED: 32
+        TZ: ${{ matrix.envinfo.TZ }}
+        TESTLOGPATH: "./log_archive/"
+        TESTLOGNAME: ${{ matrix.envinfo.name }}
+
+    runs-on: ${{ matrix.envinfo.os }}
+
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
-      - name: Run a one-line script
-        run: echo Hello, world!
+    - name: Setup Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
 
-      # Runs a set of commands using the runners shell
-      - name: Run a multi-line script
-        run: |
-          echo Add other actions to build,
-          echo test, and deploy your project.
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{matrix.envinfo.python-version}}
+        architecture: ${{matrix.envinfo.python-arch}}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools pytest pytest-xdist
+
+    - name: Run test case parallel
+      timeout-minutes: 5
+      shell: bash
+      run: |
+        pytest test_1.py
+
+

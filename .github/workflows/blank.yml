@@ -4,15 +4,9 @@ on:
   push:
     branches:
       - 'main'
-    tags:
-      - '*'
-  pull_request:
-    branches:
-      - 'main'
 
 jobs:
   test-and-build:
-    needs: setup
     strategy:
       matrix:
         envinfo:
@@ -31,11 +25,6 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-
-    - name: Setup Node.js 12.x
-      uses: actions/setup-node@v1
-      with:
-        node-version: 12.x
 
     - name: Set up Python
       uses: actions/setup-python@v2
